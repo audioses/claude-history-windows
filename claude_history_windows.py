@@ -186,7 +186,9 @@ def _card_activity(path: Path) -> float:
         raise SafetyError(tr('dest_invalid', filename=path.name))
     data = data if isinstance(data, dict) else {}
     # Opening a session updates lastFocusedAt but not lastActivityAt, so count both.
-    return max(activity_ts(data, path), activity_ts({'lastActivityAt': data.get('lastFocusedAt')}, path))
+    focused = data.get('lastFocusedAt')
+    focused_ts = activity_ts({'lastActivityAt': focused}, path) if focused else 0.0
+    return max(activity_ts(data, path), focused_ts)
 
 
 def _replace_file(src: Path, target: Path):
