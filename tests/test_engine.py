@@ -87,6 +87,13 @@ class EngineTest(unittest.TestCase):
         self.assertEqual(undo['errors'], [])
         self.assertEqual((self.dst / self.card.name).read_text(), old)
 
+    def test_later_focus_breaks_activity_tie(self):
+        base = {'sessionId': RID, 'cliSessionId': SID, 'lastActivityAt': 1793772081418}
+        (self.dst / self.card.name).write_text(json.dumps({**base, 'lastFocusedAt': 1793771992496}))
+        self.card.write_text(json.dumps({**base, 'lastFocusedAt': 1793813059032}))
+        src, dst, s = self.scan()
+        self.assertEqual(app.transfer(s, src, dst, 'copy', self.jobs)['done'], 1)
+
     def test_older_source_does_not_replace_newer_destination(self):
         (self.dst / self.card.name).write_text(json.dumps({'sessionId': RID, 'cliSessionId': SID,
                                                            'lastActivityAt': 1893456000000}))

@@ -184,7 +184,9 @@ def _card_activity(path: Path) -> float:
         data = json.loads(path.read_text(encoding='utf-8-sig'))
     except (OSError, ValueError, UnicodeError):
         raise SafetyError(tr('dest_invalid', filename=path.name))
-    return activity_ts(data if isinstance(data, dict) else {}, path)
+    data = data if isinstance(data, dict) else {}
+    # Opening a session updates lastFocusedAt but not lastActivityAt, so count both.
+    return max(activity_ts(data, path), activity_ts({'lastActivityAt': data.get('lastFocusedAt')}, path))
 
 
 def _replace_file(src: Path, target: Path):
